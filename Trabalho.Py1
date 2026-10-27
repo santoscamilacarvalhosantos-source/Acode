@@ -1,0 +1,119 @@
+"""
+Trabalho Prático 01 - Sistema de gerenciamento de escola.
+
+Relações:
+- Escola  <>-- Sala      -> COMPOSIÇÃO (a sala nasce e morre com a escola)
+- Escola  --  Professor  -> ASSOCIAÇÃO (muitos para muitos, independentes)
+- Aluno   o-- Endereco   -> AGREGAÇÃO  (endereço pertence ao aluno, mas pode viver sozinho)
+"""
+
+
+class Endereco:
+    def __init__(self, rua, numero, cidade, cep):
+        self.rua = rua
+        self.numero = numero
+        self.cidade = cidade
+        self.cep = cep
+
+    def formatar(self):
+        return f"{self.rua}, {self.numero} - {self.cidade} (CEP {self.cep})"
+
+
+class Aluno:
+    def __init__(self, nome, matricula, endereco):
+        self.nome = nome
+        self.matricula = matricula
+
+        # AGREGAÇÃO: o endereço é criado FORA e só recebido aqui.
+        # Se o aluno for apagado, o objeto Endereco continua existindo.
+        self.endereco = endereco
+
+    def apresentar(self):
+        return f"{self.nome} (mat. {self.matricula}) - {self.endereco.formatar()}"
+
+
+class Sala:
+    def __init__(self, numero, capacidade):
+        self.numero = numero
+        self.capacidade = capacidade
+
+    def descricao(self):
+        return f"Sala {self.numero} (capacidade: {self.capacidade})"
+
+
+class Professor:
+    def __init__(self, nome, disciplina):
+        self.nome = nome
+        self.disciplina = disciplina
+        self.escolas = []
+
+    # ASSOCIAÇÃO: conhece as escolas onde leciona
+    def lecionar_em(self, escola):
+        if escola not in self.escolas:
+            self.escolas.append(escola)
+            escola.professores.append(self)
+
+
+class Escola:
+    def __init__(self, nome):
+        self.nome = nome
+        self.professores = []
+
+        # COMPOSIÇÃO com Sala
+        self._salas = []
+
+    def criar_sala(self, numero, capacidade):
+        # COMPOSIÇÃO: a própria Escola cria a Sala.
+        sala = Sala(numero, capacidade)
+        self._salas.append(sala)
+        return sala
+
+    def listar_salas(self):
+        return [s.descricao() for s in self._salas]
+
+    def listar_professores(self):
+        return [p.nome for p in self.professores]
+
+
+if __name__ == "__main__":
+
+    # Escola fictícias localizadas em Parnaíba - PI
+    escola_a = Escola("Colégio Parnaíba")
+    escola_b = Escola("Colégio Nossa Senhora da Graça")
+
+    # Salas da escola
+    escola_a.criar_sala(101, 30)
+    escola_a.criar_sala(102, 25)
+
+    # Professor fictício
+    prof = Professor("Ana Carolina Mendes", "Matemática")
+
+    # O mesmo professor pode lecionar em duas escolas
+    prof.lecionar_em(escola_a)
+    prof.lecionar_em(escola_b)
+
+    # Endereço de um aluno em Parnaíba - PI
+    end = Endereco(
+        "Avenida São Sebastião",
+        953,
+        "Parnaíba - PI",
+        "64215-065"
+    )
+
+    # Aluno fictício
+    aluno = Aluno(
+        "Lucas Gabriel Silva",
+        "2026001",
+        end
+    )
+
+    print(escola_a.nome, "->", escola_a.listar_salas())
+    print(escola_a.nome, "-> professores:", escola_a.listar_professores())
+    print(escola_b.nome, "-> professores:", escola_b.listar_professores())
+    print(aluno.apresentar())
+
+    # Prova da agregação:
+    # apagando o aluno, o endereço continua existindo
+    del aluno
+
+    print("Endereço ainda existe:", end.formatar())
