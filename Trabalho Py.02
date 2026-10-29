@@ -1,0 +1,90 @@
+---
+
+## 1. Identificação de classes
+
+Veiculo, Carro, Moto, Caminhao, Cliente, PessoaFisica, PessoaJuridica, Contrato, Condutor e Manutencao.
+
+---
+
+## 2. Atributos e métodos
+
+| Classe | Atributos | Métodos |
+|---|---|---|
+| Veiculo | placa, modelo, ano, valor_diaria | calcular_aluguel(), exibir_dados() |
+| Carro | numero_portas, tipo_combustivel, placa | exibir_dados(), calcular_aluguel() |
+| Moto | cilindradas, partida_eletrica, placa | exibir_dados(), calcular_aluguel() |
+| Caminhao | capacidade_carga, numero_eixos, placa | exibir_dados(), calcular_aluguel() |
+| Cliente | nome_razao_social, documento, telefone | exibir_dados(), atualizar_telefone() |
+| PessoaFisica | cpf, data_nascimento, nome | validar_cpf(), exibir_dados() |
+| PessoaJuridica | cnpj, nome_fantasia, razao_social | validar_cnpj(), exibir_dados() |
+| Contrato | data_inicio, data_fim, valor_total, status | calcular_valor_total(), finalizar() |
+| Condutor | nome, numero_cnh | validar_cnh(), exibir_dados() |
+| Manutencao | data, tipo_servico, custo | registrar(), exibir_detalhes() |
+
+---
+
+## 3. Herança
+
+- **Veiculo** (superclasse) → **Carro, Moto e Caminhao** (subclasses).
+  Todos têm placa, modelo, ano e valor da diária, que ficam na superclasse. Cada tipo tem características próprias, como número de portas, cilindradas e capacidade de carga.
+- **Cliente** (superclasse) → **PessoaFisica e PessoaJuridica** (subclasses).
+  Todo cliente tem nome/razão social, documento e telefone. A diferença é que um usa CPF e o outro usa CNPJ.
+
+---
+
+## 4. Relacionamentos entre classes
+
+| Classes | Tipo | Justificativa |
+|---|---|---|
+| Cliente e Contrato | Associação | O cliente existe sem contrato, e o contrato se liga a exatamente um cliente. |
+| Veiculo e Contrato | Associação | O veículo existe independentemente do contrato. |
+| Contrato e Condutor | Composição | Se o contrato for excluído, o condutor deixa de existir. |
+| Veiculo e Manutencao | Composição | Cada manutenção pertence a um único veículo e faz parte do histórico dele. |
+
+---
+
+## 5. Implementação parcial em Python
+
+Foram escolhidas as classes **Contrato** e **Condutor**, que se relacionam por **composição**.
+
+O `Condutor` é criado dentro do construtor do `Contrato` (`self.condutor = Condutor(...)`). Por isso ele só existe enquanto o contrato existir.
+
+O código está no arquivo [questao5.py](questao5.py).
+
+Para executar:
+
+```
+class Condutor:
+    def __init__(self, nome, cnh):
+        self.nome = nome
+        self.cnh = cnh
+
+    def exibir_dados(self):
+        print(f"Condutor: {self.nome} | CNH: {self.cnh}")
+
+
+class Contrato:
+    def __init__(self, data_inicio, data_fim, valor_total, nome_condutor, cnh_condutor):
+        self.data_inicio = data_inicio
+        self.data_fim = data_fim
+        self.valor_total = valor_total
+        self.status = "ativo"
+        # Composição: o Contrato cria o Condutor dentro dele
+        self.condutor = Condutor(nome_condutor, cnh_condutor)
+
+    def finalizar(self):
+        self.status = "finalizado"
+
+
+contrato = Contrato("01/10/2026", "06/10/2026", 600.0, "Maria Souza", "12345678901")
+contrato.condutor.exibir_dados()
+contrato.finalizar()
+print("Status:", contrato.status)
+
+```
+Saída esperada:
+
+```
+Condutor: Ana Maria| CNH: 12345678901
+Status: finalizado
+```
